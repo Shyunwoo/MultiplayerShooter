@@ -1,0 +1,8 @@
+content/Blueprints filter=lfs diff=lfs merge=lfs -text
+content/Collections filter=lfs diff=lfs merge=lfs -text
+content/Developers filter=lfs diff=lfs merge=lfs -text
+content/Maps filter=lfs diff=lfs merge=lfs -text
+content/ThirdPerson filter=lfs diff=lfs merge=lfs -text
+content/__ExternalActors__ filter=lfs diff=lfs merge=lfs -text
+content/__ExternalObjects__ filter=lfs diff=lfs merge=lfs -text
+content/Assets filter=lfs diff=lfs merge=lfs -text
