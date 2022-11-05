@@ -26,10 +26,10 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="True"))
 	float Speed;
 
-	UPROPERTY(BlueprintReadOnly, Category=Character, meta=(AllowPrivateAccess="True"))
+	UPROPERTY(BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="True"))
 	bool bIsInAir;
 
-	UPROPERTY(BlueprintReadOnly, Category=Character, meta=(AllowPrivateAccess="True"))
+	UPROPERTY(BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="True"))
 	bool bIsAccelerating;
 
 	UPROPERTY(BlueprintReadOnly, Category=Character, meta=(AllowPrivateAccess="True"))
@@ -37,7 +37,7 @@ private:
 
 	class AWeapon* EquippedWeapon;
 
-	UPROPERTY(BlueprintReadOnly, Category=Character, meta=(AllowPrivateAccess="True"))
+	UPROPERTY(BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="True"))
 	bool bIsCrouched;
 
 	UPROPERTY(BlueprintReadOnly, Category=Character, meta=(AllowPrivateAccess="True"))
@@ -46,7 +46,7 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category=Character, meta=(AllowPrivateAccess="True"))
 	float YawOffset;
 
-	UPROPERTY(BlueprintReadOnly, Category=Character, meta=(AllowPrivateAccess="True"))
+	UPROPERTY(BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="True"))
 	float Lean;
 
 	FRotator CharacterRotationLastFrame;
@@ -62,6 +62,15 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category=Character, meta=(AllowPrivateAccess="True"))
 	FTransform LeftHandTransform;
 
-	UPROPERTY(BlueprintReadOnly, Category=Character, meta=(AllowPrivateAccess="True"))
+	UPROPERTY(BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="True"))
 	ETurningInPlace TurningInPlace;
+
+	UPROPERTY(BlueprintReadOnly, Category=Character, meta=(AllowPrivateAccess="True"))
+	FRotator RightHandRotation;
+
+	UPROPERTY(BlueprintReadOnly, Category=Character, meta=(AllowPrivateAccess="True"))
+	bool bLocallyControlled;
+
+	UPROPERTY(BlueprintReadOnly, Category=Character, meta=(AllowPrivateAccess="True"))
+	bool bRotateRootBone;
 };

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Blaster/HUD/BlasterHUD.h"
 #include "Components/ActorComponent.h"
 #include "CombatComponent.generated.h"
 
@@ -32,6 +33,7 @@ protected:
 	void OnRep_EquippedWeapon();
 
 	void FireButtonPressed(bool bPressed);
+	void Fire();
 
 	UFUNCTION(Server, Reliable)
 	void ServerFire(const FVector_NetQuantize& TraceHitTarget);
@@ -60,5 +62,38 @@ private:
 	float AimWalkSpeed;
 
 	bool bFireButtonPressed;
+
+	//HUD and Crosshairs
+	float CrosshairVelocityFactor;
+	float CrosshairInAirFactor;
+	float CrosshairAimFactor;
+	float CrosshairShootingFactor;
+
+	FVector HitTarget;
+
+	FHUDPackage HUDPackage;
+
+	//Aiming and field of view
+
+	float DefaultFOV;
+
+	UPROPERTY(EditAnywhere, Category=Combat)
+	float ZoomedFOV=30.f;
+
+	float CurrentFOV;
+
+	UPROPERTY(EditAnywhere, Category=Combat)
+	float ZoomInterpSpeed=20.f;
+
+	void InterpFOV(float DeltaTime);
+
+	//AutomaticHandle fire
+	FTimerHandle FireTimer;
+
+	UPROPERTY(EditAnywhere, Category=Combat)
+	bool bCanFire=true;
+
+	void StartFireTimer();
+	void FireTimerFinished();
 
 };
