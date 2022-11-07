@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blaster/BlasterTypes/TurningInPlace.h"
+#include "Components/TimelineComponent.h"
 #include "Blaster/Interfaces/InteractCrosshairsInterface.h"
 #include "GameFramework/Character.h"
 #include "BlasterChar.generated.h"
@@ -21,11 +22,14 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
 	void PlayFireMontage(bool bAiming);
-
-	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastHit();
+	void PlayElimMontage();
 
 	virtual void OnRep_ReplicatedMovement() override;
+
+	void Elim();
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastElim();
+	virtual void Destroyed() override;
 protected:
 	virtual void BeginPlay() override;
 
@@ -46,6 +50,10 @@ protected:
 	void CalculateAO_Pitch();
 
 	void PlayHitReactMontage();
+
+	UFUNCTION()
+	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
+	void UpdateHUDHealth();
 
 private:
 	UPROPERTY(VisibleAnywhere, Category=Camere)
@@ -83,6 +91,9 @@ private:
 	UPROPERTY(EditAnywhere, Category=Combat)
 	class UAnimMontage* HitReactMontage;
 
+	UPROPERTY(EditAnywhere, Category=Combat)
+	class UAnimMontage* ElimMontage;
+
 	void HideCameraIfCharacterClose();
 
 	UPROPERTY(EditAnywhere)
@@ -95,6 +106,60 @@ private:
 	float ProxyYaw;
 	float TimeSinceLastMovementReplication;
 	float CalculateSpeed();
+
+	//Player health
+	UPROPERTY(EditAnywhere, Category="Player Stats")
+	float MaxHealth=100.f;
+
+	UPROPERTY(ReplicatedUsing=OnRep_Health, VisibleAnywhere, Category="Player Stats")
+	float Health=100.f;
+
+	UFUNCTION()
+	void OnRep_Health();
+
+	class ABlasterController* BlasterPlayerController;
+
+	bool bElimmed=false;
+
+	FTimerHandle ElimTimer;
+
+	UPROPERTY(EditDefaultsOnly)
+	float ElimDelay=3.f;
+
+	void ElimTimerFinished();
+
+	//Dissolve effect
+	UPROPERTY(VisibleAnywhere)
+	UTimelineComponent* DissolveTimeline;
+
+	FOnTimelineFloat DissolveTrack;
+
+	UPROPERTY(EditAnywhere)
+	UCurveFloat* DissolveCurve;
+
+	UFUNCTION()
+	void UpdateDissolveMaterial(float DissolveValue);
+
+	void StartDissolve();
+
+	//Dynamic instance that we can change at runtime
+	UPROPERTY(VisibleAnywhere, Category=Elim)
+	UMaterialInstanceDynamic* DynamicDissolveMaterialInstance;
+
+	//Material instance set on the bluprint, used with the dynamin material instance
+	UPROPERTY(EditAnywhere, Category=Elim)
+	UMaterialInstance* DissolveMaterialInstance;
+
+	//Elim Bot
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* ElimBotEffect;
+
+	UPROPERTY(VisibleAnywhere)
+	UParticleSystemComponent* ElimBotComponent;
+
+	UPROPERTY(EditAnywhere)
+	class USoundCue* ElimBotSound;
+
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped();
@@ -107,4 +172,7 @@ public:
 
 	FORCEINLINE UCameraComponent* GetFollowCamera() const{return FollowCamera;}
 	FORCEINLINE bool ShouldRotateRootBone() const{return bRotateRootBone;}
+	FORCEINLINE bool IsElimmed() const{return bElimmed;}
+	FORCEINLINE float GetHealth() const{return Health;}
+	FORCEINLINE float GetMaxHealth() const{return MaxHealth;}
 };

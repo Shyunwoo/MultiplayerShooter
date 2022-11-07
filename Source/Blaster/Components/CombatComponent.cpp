@@ -159,6 +159,22 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	Character->bUseControllerRotationYaw=true;
 }
 
+void UCombatComponent::OnRep_EquippedWeapon()
+{
+	if(EquippedWeapon&&Character)
+	{
+		EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+
+		const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
+		if(HandSocket)
+		{
+			HandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
+		}
+		Character->GetCharacterMovement()->bOrientRotationToMovement=false;
+		Character->bUseControllerRotationYaw=true;
+	}
+}
+
 void UCombatComponent::SetAiming(bool bIsAiming)
 {
 	bAiming=bIsAiming;
@@ -175,15 +191,6 @@ void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
 	if(Character)
 	{
 		Character->GetCharacterMovement()->MaxWalkSpeed=bIsAiming?AimWalkSpeed:BaseWalkSpeed;
-	}
-}
-
-void UCombatComponent::OnRep_EquippedWeapon()
-{
-	if(EquippedWeapon&&Character)
-	{
-		Character->GetCharacterMovement()->bOrientRotationToMovement=false;
-		Character->bUseControllerRotationYaw=true;
 	}
 }
 

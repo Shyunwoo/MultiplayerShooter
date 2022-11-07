@@ -17,6 +17,7 @@ void AProjectileWeapon::Fire(const FVector& HitTarget)
     if(MuzzleFlashSocket)
     {
         FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
+        
         //From Muzzle flash socket to hit location from TraceUnderCrosshairs
         FVector ToTarget = HitTarget - SocketTransform.GetLocation();
         FRotator TargetRotation = ToTarget.Rotation();

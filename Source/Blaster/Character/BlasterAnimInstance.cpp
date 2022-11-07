@@ -38,6 +38,7 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
     bAiming=BlasterChar->IsAiming();
     TurningInPlace=BlasterChar->GetTurningInPlace();
     bRotateRootBone=BlasterChar->ShouldRotateRootBone();
+    bElimmed=BlasterChar->IsElimmed();
 
     FRotator AimRotation = BlasterChar->GetBaseAimRotation();
     FRotator MovementRotation=UKismetMathLibrary::MakeRotFromX(BlasterChar->GetVelocity());

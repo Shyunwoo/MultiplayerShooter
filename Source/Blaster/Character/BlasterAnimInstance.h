@@ -73,4 +73,7 @@ private:
 
 	UPROPERTY(BlueprintReadOnly, Category=Character, meta=(AllowPrivateAccess="True"))
 	bool bRotateRootBone;
+
+	UPROPERTY(BlueprintReadOnly, Category=Character, meta=(AllowPrivateAccess="True"))
+	bool bElimmed;
 };
