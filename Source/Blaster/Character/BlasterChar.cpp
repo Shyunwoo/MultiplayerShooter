@@ -19,6 +19,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Blaster/PlayerState/BlasterPlayerState.h"
 
 // Sets default values
 ABlasterChar::ABlasterChar()
@@ -180,6 +181,20 @@ void ABlasterChar::Tick(float DeltaTime)
 	}
 	
 	HideCameraIfCharacterClose();
+	PollInit();
+}
+
+void ABlasterChar::PollInit()
+{
+	if(BlasterPlayerState==nullptr)
+	{
+		BlasterPlayerState=GetPlayerState<ABlasterPlayerState>();
+		if(BlasterPlayerState)
+		{
+			BlasterPlayerState->AddToScore(0.f);
+			BlasterPlayerState->AddToDefeats(0);
+		}
+	}
 }
 
 void ABlasterChar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
