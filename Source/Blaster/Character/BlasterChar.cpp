@@ -20,6 +20,7 @@
 #include "Sound/SoundCue.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Blaster/PlayerState/BlasterPlayerState.h"
+#include "Blaster/Weapon/WeaponTypes.h"
 
 // Sets default values
 ABlasterChar::ABlasterChar()
@@ -97,6 +98,10 @@ void ABlasterChar::Elim()
 
 void ABlasterChar::MulticastElim_Implementation()
 {
+	if(BlasterPlayerController)
+	{
+		BlasterPlayerController->SetHUDWeaponAmmo(0);
+	}
 	bElimmed=true;
 	PlayElimMontage();
 
@@ -214,6 +219,7 @@ void ABlasterChar::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ABlasterChar::AimButtonReleased);
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ABlasterChar::FireButtonPressed);
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &ABlasterChar::FireButtonReleased);
+	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ABlasterChar::ReloadButtonPressed);
 }
 
 void ABlasterChar::PostInitializeComponents()
@@ -235,6 +241,27 @@ void ABlasterChar::PlayFireMontage(bool bAiming)
 		AnimInstance->Montage_Play(FireWeaponMontage);
 		FName SectionName;
 		SectionName=bAiming?FName("RifleAim"):FName("RifleHip");
+		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+}
+
+void ABlasterChar::PlayReloadMontage()
+{
+	if(Combat==nullptr||Combat->EquippedWeapon==nullptr) return;
+
+	UAnimInstance* AnimInstance=GetMesh()->GetAnimInstance();
+	if(AnimInstance&&ReloadMontage)
+	{
+		AnimInstance->Montage_Play(ReloadMontage);
+		FName SectionName;
+		
+		switch(Combat->EquippedWeapon->GetWeaponType())
+		{
+		case EWeaponType::EWT_AssaultRifle:
+			SectionName = FName("Rifle");
+			break;
+		}
+
 		AnimInstance->Montage_JumpToSection(SectionName);
 	}
 }
@@ -371,6 +398,14 @@ void ABlasterChar::CrouchButtonPressed()
 	else
 	{
 		Crouch();
+	}
+}
+
+void ABlasterChar::ReloadButtonPressed()
+{
+	if(Combat)
+	{
+		Combat->Reload();
 	}
 }
 
@@ -621,3 +656,9 @@ FVector ABlasterChar::GetHitTarget() const
 	return Combat->HitTarget;
 }
 
+ECombatState ABlasterChar::GetCombatState() const
+{
+	if(Combat==nullptr) return ECombatState::ECS_MAX;
+
+	return Combat->CombatState;
+}

@@ -54,10 +54,41 @@ void ABlasterController::SetHUDScore(float Score)
 void ABlasterController::SetHUDDefeats(int32 Defeats)
 {
     BlasterHUD=BlasterHUD==nullptr?Cast<ABlasterHUD>(GetHUD()):BlasterHUD;
-    bool bHUDValid=BlasterHUD&&BlasterHUD->CharacterOverlay&&BlasterHUD->CharacterOverlay->DefeatsAmount;
+    bool bHUDValid=BlasterHUD&&
+    BlasterHUD->CharacterOverlay&&
+    BlasterHUD->CharacterOverlay->DefeatsAmount;
+
     if(bHUDValid)
     {
         FString DefeatsText=FString::Printf(TEXT("%d"), Defeats);
         BlasterHUD->CharacterOverlay->DefeatsAmount->SetText(FText::FromString(DefeatsText));
+    }
+}
+
+void ABlasterController::SetHUDWeaponAmmo(int32 Ammo)
+{
+    BlasterHUD=BlasterHUD==nullptr?Cast<ABlasterHUD>(GetHUD()):BlasterHUD;
+    bool bHUDValid=BlasterHUD&&
+    BlasterHUD->CharacterOverlay&&
+    BlasterHUD->CharacterOverlay->WeaponAmmoAmount;
+
+    if(bHUDValid)
+    {
+        FString AmmoText=FString::Printf(TEXT("%d"), Ammo);
+        BlasterHUD->CharacterOverlay->WeaponAmmoAmount->SetText(FText::FromString(AmmoText));
+    }
+}
+
+void ABlasterController::SetHUDCarriedAmmo(int32 Ammo)
+{
+    BlasterHUD=BlasterHUD==nullptr?Cast<ABlasterHUD>(GetHUD()):BlasterHUD;
+    bool bHUDValid=BlasterHUD&&
+    BlasterHUD->CharacterOverlay&&
+    BlasterHUD->CharacterOverlay->CarriedAmmoAmount;
+
+    if(bHUDValid)
+    {
+        FString AmmoText=FString::Printf(TEXT("%d"), Ammo);
+        BlasterHUD->CharacterOverlay->CarriedAmmoAmount->SetText(FText::FromString(AmmoText));
     }
 }
