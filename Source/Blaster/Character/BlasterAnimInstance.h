@@ -79,4 +79,10 @@ private:
 
 	UPROPERTY(BlueprintReadOnly, Category=Character, meta=(AllowPrivateAccess="True"))
 	bool bUseFABRIK;
+
+	UPROPERTY(BlueprintReadOnly, Category=Character, meta=(AllowPrivateAccess="True"))
+	bool bUseAimOffsets;
+
+	UPROPERTY(BlueprintReadOnly, Category=Character, meta=(AllowPrivateAccess="True"))
+	bool bTransformRightHand;
 };
