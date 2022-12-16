@@ -18,29 +18,49 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	void StartDestroyTimer();
+	void DestroyTimerSinished();
+	void ExplodeDamage();
 
 	UFUNCTION()
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 	UPROPERTY(EditAnywhere)
 	float Damage=20.f;
-private:	
+
+	UPROPERTY(EditAnywhere)
+	class UParticleSystem* ImpactParticles;
+
+	UPROPERTY(EditAnywhere)
+	class USoundCue* ImpactSound;
+
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* CollisionBox;
 
 	UPROPERTY(VisibleAnywhere)
 	class UProjectileMovementComponent* ProjectileMovementComponent;
 
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* ProjectileMesh;
+	
 	UPROPERTY(EditAnywhere)
-	class UParticleSystem* Tracer;
+	float DamageInnerRadius=200.f;
+
+	UPROPERTY(EditAnywhere)
+	float DamageOuterRadius=500.f;
+
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* Tracer;
 
 	UPROPERTY()
 	class UParticleSystemComponent* TracerComponent;
 
-	UPROPERTY(EditAnywhere)
-	UParticleSystem* ImpactParticles;
+	UFUNCTION()
+	void ShowTracer();
+
+private:
+	FTimerHandle DestroyTimer;
 
 	UPROPERTY(EditAnywhere)
-	class USoundCue* ImpactSound;
-
+	float DestroyTime = 3.f;
 };
