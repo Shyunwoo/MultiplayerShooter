@@ -9,7 +9,7 @@
 #include "Sound/SoundCue.h"
 #include "Blaster/Character/BlasterChar.h"
 #include "Blaster/Blaster.h"
-
+#include "Components/SkeletalMeshComponent.h"
 
 AProjectile::AProjectile()
 {
@@ -25,6 +25,9 @@ AProjectile::AProjectile()
 	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
 	CollisionBox->SetCollisionResponseToChannel(ECC_SkeletalMesh, ECollisionResponse::ECR_Block);
 
+	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
+    SkeletalMesh->SetupAttachment(RootComponent);
+    SkeletalMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AProjectile::BeginPlay()

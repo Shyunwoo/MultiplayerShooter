@@ -58,6 +58,10 @@ ABlasterChar::ABlasterChar()
 	MinNetUpdateFrequency=33.f;
 
 	DissolveTimeline=CreateDefaultSubobject<UTimelineComponent>(TEXT("DissolveTimelineComponent"));
+
+	AttachedGrenade = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Grenade"));
+	AttachedGrenade->SetupAttachment(GetMesh(), FName("GrenadeSocket"));
+	AttachedGrenade->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void ABlasterChar::BeginPlay()
@@ -68,6 +72,10 @@ void ABlasterChar::BeginPlay()
 	if(HasAuthority())
 	{
 		OnTakeAnyDamage.AddDynamic(this, &ABlasterChar::ReceiveDamage);
+	}
+	if(AttachedGrenade)
+	{
+		AttachedGrenade->SetVisibility(false);
 	}
 }
 
@@ -245,6 +253,7 @@ void ABlasterChar::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ABlasterChar::FireButtonPressed);
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &ABlasterChar::FireButtonReleased);
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ABlasterChar::ReloadButtonPressed);
+	PlayerInputComponent->BindAction("ThrowGrenade", IE_Pressed, this, &ABlasterChar::GrenadeButtonPressed);
 }
 
 void ABlasterChar::PostInitializeComponents()
@@ -341,6 +350,7 @@ void ABlasterChar::PlayHitReactMontage()
 
 void ABlasterChar::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser)
 {
+	if(bElimmed) return;
 	Health=FMath::Clamp(Health-Damage, 0.f, MaxHealth);
 	UpdateHUDHealth();
 	PlayHitReactMontage();
@@ -473,6 +483,14 @@ void ABlasterChar::AimButtonReleased()
 	if(Combat)
 	{
 		Combat->SetAiming(false);
+	}
+}
+
+void ABlasterChar::GrenadeButtonPressed()
+{
+	if(Combat)
+	{
+		Combat->ThrowGrenade();
 	}
 }
 
@@ -667,7 +685,6 @@ void ABlasterChar::UpdateDissolveMaterial(float DissolveValue)
 	}
 }
 
-
 void ABlasterChar::SetOverlappingWeapon(AWeapon* Weapon)
 {
 	if(OverlappingWeapon)
@@ -715,4 +732,13 @@ ECombatState ABlasterChar::GetCombatState() const
 	if(Combat==nullptr) return ECombatState::ECS_MAX;
 
 	return Combat->CombatState;
+}
+
+void ABlasterChar::PlayThrowGrenadeMontage()
+{
+	UAnimInstance* AnimInstance=GetMesh()->GetAnimInstance();
+	if(AnimInstance && ThrowGrenadeMontage)
+	{
+		AnimInstance->Montage_Play(ThrowGrenadeMontage);
+	}
 }

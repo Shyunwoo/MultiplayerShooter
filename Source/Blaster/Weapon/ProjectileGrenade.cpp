@@ -5,6 +5,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
+#include "Components/SkeletalMeshComponent.h"
 
 AProjectileGrenade::AProjectileGrenade()
 {

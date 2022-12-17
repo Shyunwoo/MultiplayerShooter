@@ -58,6 +58,9 @@ protected:
 	UFUNCTION()
 	void ShowTracer();
 
+	UPROPERTY(VisibleAnywhere)
+	class USkeletalMeshComponent* SkeletalMesh;
+
 private:
 	FTimerHandle DestroyTimer;
 
