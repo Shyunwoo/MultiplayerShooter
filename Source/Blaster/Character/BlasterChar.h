@@ -40,6 +40,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void ShowSniperScopeWidget(bool bShowScope);
 
+	void UpdateHUDHealth();
+	void UpdateHUDShield();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -65,7 +68,6 @@ protected:
 
 	UFUNCTION()
 	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
-	void UpdateHUDHealth();
 
 	//Poll for any relavant classes and initialize our HUD
 	void PollInit();
@@ -90,6 +92,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	class UCombatComponent* Combat;
+
+	UPROPERTY(VisibleAnywhere, meta=(AllowPrivateAccess="true"))
+	class UBuffComponent* Buff;
 
 	UFUNCTION(Server, Reliable)
 	void ServerEquipButtonPressed();
@@ -139,7 +144,17 @@ private:
 	float Health=100.f;
 
 	UFUNCTION()
-	void OnRep_Health();
+	void OnRep_Health(float LastHealth);
+
+	//Player Shield
+	UPROPERTY(EditAnywhere, Category="Player Stats")
+	float MaxShield=100.f;
+
+	UPROPERTY(ReplicatedUsing=OnRep_Shield, EditAnywhere, Category="Player Stats")
+	float Shield=100.f;
+
+	UFUNCTION()
+	void OnRep_Shield(float LastShield);
 
 	UPROPERTY()
 	class ABlasterController* BlasterPlayerController;
@@ -205,11 +220,18 @@ public:
 	FORCEINLINE UCameraComponent* GetFollowCamera() const{return FollowCamera;}
 	FORCEINLINE bool ShouldRotateRootBone() const{return bRotateRootBone;}
 	FORCEINLINE bool IsElimmed() const{return bElimmed;}
+
 	FORCEINLINE float GetHealth() const{return Health;}
+	FORCEINLINE void SetHealth(float Amount) {Health= Amount;}
 	FORCEINLINE float GetMaxHealth() const{return MaxHealth;}
+
+	FORCEINLINE float GetShield() const{return Shield;}
+	FORCEINLINE void SetShield(float Amount) {Shield= Amount;}
+	FORCEINLINE float GetMaxShield() const{return MaxShield;}
 	ECombatState GetCombatState() const;
 
 	FORCEINLINE UCombatComponent* GetCombat() const {return Combat;}
+	FORCEINLINE UBuffComponent* GetBuff() const {return Buff;}
 	FORCEINLINE bool GetDisableGameplay() const {return bDisableGameplay;}
 
 	FORCEINLINE UAnimMontage* GetReloadMontage() const {return ReloadMontage;}

@@ -9,7 +9,6 @@
 #include "Net/UnrealNetwork.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "DrawDebugHelpers.h"
 #include "Blaster/PlayerController/BlasterController.h"
 #include "Camera/CameraComponent.h"
 #include "TimerManager.h"
@@ -314,6 +313,20 @@ void UCombatComponent::UpdateShotgunAmmoValues()
 	if(EquippedWeapon->IsFull() || CarriedAmmo == 0)
 	{
 		JumpToShotgunEnd();
+	}
+}
+
+void UCombatComponent::PickupAmmo(EWeaponType WeaponType, int32 AmmoAmount)
+{
+	if(CarriedAmmoMap.Contains(WeaponType))
+	{
+		CarriedAmmoMap[WeaponType] = FMath::Clamp(CarriedAmmoMap[WeaponType]+AmmoAmount, 0, MaxCarriedAmmo);
+
+		UpdateCarriedAmmo();
+	}
+	if(EquippedWeapon && EquippedWeapon->IsEmpty() && EquippedWeapon->GetWeaponType() == WeaponType)
+	{
+		Reload();
 	}
 }
 

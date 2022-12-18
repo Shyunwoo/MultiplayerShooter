@@ -9,6 +9,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Blaster/Weapon/Weapon.h"
 #include "Blaster/Components/CombatComponent.h"
+#include "Blaster/Components/BuffComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "BlasterAnimInstance.h"
@@ -46,6 +47,9 @@ ABlasterChar::ABlasterChar()
 	Combat=CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 	Combat->SetIsReplicated(true);
 
+	Buff=CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
+	Buff->SetIsReplicated(true);
+
 	GetCharacterMovement()->NavAgentProps.bCanCrouch=true;
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionObjectType(ECC_SkeletalMesh);
@@ -69,6 +73,7 @@ void ABlasterChar::BeginPlay()
 	Super::BeginPlay();
 	
 	UpdateHUDHealth();
+	UpdateHUDShield();
 	if(HasAuthority())
 	{
 		OnTakeAnyDamage.AddDynamic(this, &ABlasterChar::ReceiveDamage);
@@ -263,6 +268,12 @@ void ABlasterChar::PostInitializeComponents()
 	{
 		Combat->Character=this;
 	}
+	if(Buff)
+	{
+		Buff->Character=this;
+		Buff->SetInitialSpeeds(GetCharacterMovement()->MaxWalkSpeed, GetCharacterMovement()->MaxWalkSpeedCrouched);
+		Buff->SetInitialJumpVelocity(GetCharacterMovement()->JumpZVelocity);
+	}
 }
 
 void ABlasterChar::PlayFireMontage(bool bAiming)
@@ -351,8 +362,26 @@ void ABlasterChar::PlayHitReactMontage()
 void ABlasterChar::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser)
 {
 	if(bElimmed) return;
-	Health=FMath::Clamp(Health-Damage, 0.f, MaxHealth);
+
+	float DamageToHealth = Damage;
+	if(Shield > 0.f)
+	{
+		if(Shield >= Damage)
+		{
+			Shield=FMath::Clamp(Shield-Damage, 0.f, MaxShield);
+			DamageToHealth=0.f;
+		}
+		else
+		{
+			Shield = 0.f;
+			DamageToHealth = FMath::Clamp(DamageToHealth - Shield, 0.f, Damage);
+		}
+	}
+
+	Health=FMath::Clamp(Health-DamageToHealth, 0.f, MaxHealth);
+
 	UpdateHUDHealth();
+	UpdateHUDShield();
 	PlayHitReactMontage();
 
 	if(Health==0.f)
@@ -407,6 +436,7 @@ void ABlasterChar::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME_CONDITION(ABlasterChar, OverlappingWeapon, COND_OwnerOnly);
 	DOREPLIFETIME(ABlasterChar, Health);
 	DOREPLIFETIME(ABlasterChar, bDisableGameplay);
+	DOREPLIFETIME(ABlasterChar, Shield);
 }
 
 void ABlasterChar::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
@@ -567,10 +597,32 @@ float ABlasterChar::CalculateSpeed()
     return Velocity.Size();
 }
 
-void ABlasterChar::OnRep_Health()
+void ABlasterChar::OnRep_Health(float LastHealth)
 {
 	UpdateHUDHealth();
-	PlayHitReactMontage();
+	if(Health < LastHealth)
+	{
+		PlayHitReactMontage();
+	}
+	
+}
+
+void ABlasterChar::OnRep_Shield(float LastShield)
+{
+	UpdateHUDShield();
+	if(Shield < LastShield)
+	{
+		PlayHitReactMontage();
+	}
+}
+
+void ABlasterChar::UpdateHUDShield()
+{
+	BlasterPlayerController=BlasterPlayerController==nullptr? Cast<ABlasterController>(Controller):BlasterPlayerController;
+	if(BlasterPlayerController)
+	{
+		BlasterPlayerController->SetHUDShield(Shield, MaxShield);
+	}
 }
 
 void ABlasterChar::AimOffset(float DeltaTime)
