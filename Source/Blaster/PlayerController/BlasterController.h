@@ -64,10 +64,14 @@ protected:
 	void CheckTimeSync(float DeltaTime);
 
 	UFUNCTION(Server, Reliable)
-	void ServerCheackMatchState();
+	void ServerCheckMatchState();
 
 	UFUNCTION(Client, Reliable)
 	void ClientJoinMidGame(FName StateOfMatch, float Warmup, float Match, float Cooldown, float StartingTime);
+
+	void HighPingWarning();
+	void StopHighPingWarning();
+	void CheckPing(float DeltaTime);
 
 private:
 	UPROPERTY()
@@ -103,8 +107,21 @@ private:
 	float HUDShield;
 	bool bInitializeShield = false;
 	float HUDMaxShield;
+	bool bInitializeCarriedAmmo = false;
+	float HUDCarriedAmmo;
+	bool bInitializeWeaponAmmo = false;
+	float HUDWeaponAmmo;
 
-public:
+	//High Ping Waring
+	float HighPingRunningTime = 0.f;
+	float PingAnimationRunningTime = 0.f;
 
+	UPROPERTY(EditAnywhere)
+	float HighPingDuration = 5.f;
 
+	UPROPERTY(EditAnywhere)
+	float CheckPingFrequency = 30.f;
+
+	UPROPERTY(EditAnywhere)
+	float HighPingThreshold = 50.f;
 };

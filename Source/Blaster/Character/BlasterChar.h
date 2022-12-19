@@ -42,6 +42,9 @@ public:
 
 	void UpdateHUDHealth();
 	void UpdateHUDShield();
+	void UpdateHUDAmmo();
+
+	void SpawnDefaultWeapon();
 
 protected:
 	virtual void BeginPlay() override;
@@ -60,6 +63,8 @@ protected:
 	void GrenadeButtonPressed();
 	virtual void Jump() override;
 	void SimProxiesTurn();
+	void DropOrDestroyWeapon(class AWeapon* Weapon);
+	void DropOrDestroyWeapons();
 
 	void AimOffset(float DeltaTime);
 	void CalculateAO_Pitch();
@@ -151,7 +156,7 @@ private:
 	float MaxShield=100.f;
 
 	UPROPERTY(ReplicatedUsing=OnRep_Shield, EditAnywhere, Category="Player Stats")
-	float Shield=100.f;
+	float Shield=0.f;
 
 	UFUNCTION()
 	void OnRep_Shield(float LastShield);
@@ -206,6 +211,10 @@ private:
 	//Grenade
 	UPROPERTY(VisibleAnywhere)
 	USkeletalMeshComponent* AttachedGrenade;
+
+	//DefaultWeapon
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AWeapon> DefaultWeaponClass;
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
