@@ -48,7 +48,7 @@ void ABlasterController::CheckPing(float DeltaTime)
         if(PlayerState)
         {
             //Ping is compressed in Getping Function, It's actually ping / 4
-            if(PlayerState->GetPingInMilliseconds() * 4 > HighPingThreshold)
+            if(PlayerState->GetPingInMilliseconds()> HighPingThreshold)
             {
                 HighPingWarning();
                 PingAnimationRunningTime=0.f;
@@ -370,10 +370,10 @@ void ABlasterController::PollInit()
 void ABlasterController::ServerRequestServerTime_Implementation(float TimeOfClinetRequest)
 {
     float ServerTimeOfReceipt = GetWorld()->GetTimeSeconds();
-    ClientReqortServerTime(TimeOfClinetRequest, ServerTimeOfReceipt);
+    ClientReportServerTime(TimeOfClinetRequest, ServerTimeOfReceipt);
 }
 
-void ABlasterController::ClientReqortServerTime_Implementation(float TimeOffClientRequest, float TimeServerReceivedClientRequest)
+void ABlasterController::ClientReportServerTime_Implementation(float TimeOffClientRequest, float TimeServerReceivedClientRequest)
 {
     float RoundTripTime = GetWorld()->GetTimeSeconds() - TimeOffClientRequest;
     float CurrentServerTime = TimeServerReceivedClientRequest + (RoundTripTime * 0.5f);

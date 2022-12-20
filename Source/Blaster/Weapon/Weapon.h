@@ -116,6 +116,13 @@ protected:
 		int32 OtherBodyIndex
 	);
 
+	//Trace end with scatter
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter");
+	float DistanceToSphere = 800.f;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter");
+	float SphereRadius = 75.f;
+
 private:
 	UPROPERTY(VisibleAnywhere, Category="Weapon Properties")
 	USkeletalMeshComponent* WeaponMesh;
@@ -138,16 +145,23 @@ private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class ACasing> CasingClass;
 
-	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_Ammo)
+	UPROPERTY(EditAnywhere)
 	int32 Ammo;
 
-	UFUNCTION()
-	void OnRep_Ammo();
+	UFUNCTION(Client, Reliable)
+	void ClientUpdateAmmo(int32 ServerAmmo);
+
+	UFUNCTION(Client, Reliable)
+	void ClientAddAmmo(int32 AmmoToAdd);
 
 	void SpendRound();
 
 	UPROPERTY(EditAnywhere)
 	int32 MagCapacity;
+
+	//The number of unprocessed server requests for ammo
+	//Incremented in SpendRound, decremented in ClientUpdateammo
+	int32 Sequence = 0;
 
 	UPROPERTY()
 	class ABlasterChar* BlasterOwnerCharacter;
@@ -157,13 +171,6 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	EWeaponType WeaponType;
-
-	//Trace end with scatter
-	UPROPERTY(EditAnywhere, Category = "Weapon Scatter");
-	float DistanceToSphere = 800.f;
-
-	UPROPERTY(EditAnywhere, Category = "Weapon Scatter");
-	float SphereRadius = 75.f;
 
 public:
 	void SetWeaponState(EWeaponState State);

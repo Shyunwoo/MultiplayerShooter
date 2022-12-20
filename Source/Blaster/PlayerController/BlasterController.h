@@ -52,7 +52,7 @@ protected:
 
 	//Reports the current server time to the client in response to ServerRequestServerTime
 	UFUNCTION(Client, Reliable)
-	void ClientReqortServerTime(float TimeOffClientRequest, float TimeServerReceivedClientRequest);
+	void ClientReportServerTime(float TimeOffClientRequest, float TimeServerReceivedClientRequest);
 
 	//Difference between client and server time
 	float ClientServerDelta = 0.f;
@@ -120,7 +120,7 @@ private:
 	float HighPingDuration = 5.f;
 
 	UPROPERTY(EditAnywhere)
-	float CheckPingFrequency = 30.f;
+	float CheckPingFrequency = 20.f;
 
 	UPROPERTY(EditAnywhere)
 	float HighPingThreshold = 50.f;
