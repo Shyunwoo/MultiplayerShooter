@@ -8,6 +8,8 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
 #include "WeaponTypes.h"
+#include "Blaster/Components/LagCompensationComponent.h"
+#include "Blaster/PlayerController/BlasterController.h"
 
 void AHitScanWeapon::Fire(const FVector& HitTarget)
 {
@@ -28,15 +30,35 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
         WeaponTraceHit(Start, HitTarget, FireHit);
 
         ABlasterChar* BlasterCharacter = Cast<ABlasterChar>(FireHit.GetActor());
-        if(BlasterCharacter && InstigatorController && HasAuthority())
+        if(BlasterCharacter && InstigatorController)
         {
-            UGameplayStatics::ApplyDamage(
-                BlasterCharacter,
-                Damage,
-                InstigatorController,
-                this,
-                UDamageType::StaticClass()
-                );
+            if(HasAuthority() && !bUseServersideRewind)
+            {
+                UGameplayStatics::ApplyDamage(
+                    BlasterCharacter,
+                    Damage,
+                    InstigatorController,
+                    this,
+                    UDamageType::StaticClass()
+                    );
+            }
+            if(!HasAuthority() && bUseServersideRewind)
+            {
+                BlasterOwnerCharacter = BlasterOwnerCharacter == nullptr ? Cast<ABlasterChar>(OwnerPawn) : BlasterOwnerCharacter;
+                BlasterOwnerController = BlasterOwnerController == nullptr ? Cast<ABlasterController>(InstigatorController) : BlasterOwnerController;
+
+                if(BlasterOwnerController && BlasterOwnerCharacter && BlasterOwnerCharacter->GetLagCompensation() && BlasterOwnerCharacter->IsLocallyControlled())
+                {
+                    BlasterOwnerCharacter->GetLagCompensation()->ServerScoreRequest(
+                        BlasterCharacter,
+                        Start,
+                        HitTarget,
+                        BlasterOwnerController->GetServerTime() - BlasterOwnerController->SingleTripTime,
+                        this
+                    );
+                }
+            }
+            
         }
 
         if(ImpactParticles)

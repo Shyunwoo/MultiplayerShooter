@@ -46,6 +46,9 @@ public:
 
 	void SpawnDefaultWeapon();
 
+	UPROPERTY()
+	TMap<FName, class UBoxComponent*> HitCollisionBoxes;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -306,4 +309,6 @@ public:
 	FORCEINLINE USkeletalMeshComponent* GetAttachedGrenade() const {return AttachedGrenade;}
 
 	bool IsLocallyReloading();
+
+	FORCEINLINE ULagCompensationComponent* GetLagCompensation() const {return LagCompensation;}
 };
