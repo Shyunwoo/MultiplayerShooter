@@ -27,6 +27,8 @@ void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 
         //Maps hit character to number of times hit
         TMap<ABlasterChar*, uint32> HitMap;
+        TMap<ABlasterChar*, uint32> HeadShotHitMap;
+
         for(FVector_NetQuantize HitTarget : HitTargets)
         {
             FHitResult FireHit;
@@ -35,14 +37,19 @@ void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
             ABlasterChar* BlasterCharacter = Cast<ABlasterChar>(FireHit.GetActor());
             if(BlasterCharacter)
             {
-                if(HitMap.Contains(BlasterCharacter))
+                const bool bHeadShot = FireHit.BoneName.ToString() == FString("head");
+
+                if(bHeadShot)
                 {
-                    HitMap[BlasterCharacter]++;
+                    if(HeadShotHitMap.Contains(BlasterCharacter)) HeadShotHitMap[BlasterCharacter]++;
+                    else HeadShotHitMap.Emplace(BlasterCharacter, 1);
                 }
                 else
                 {
-                    HitMap.Emplace(BlasterCharacter, 1);
+                    if(HitMap.Contains(BlasterCharacter)) HitMap[BlasterCharacter]++;
+                    else HitMap.Emplace(BlasterCharacter, 1);
                 }
+
                 if(ImpactParticles)
                 {
                     UGameplayStatics::SpawnEmitterAtLocation(

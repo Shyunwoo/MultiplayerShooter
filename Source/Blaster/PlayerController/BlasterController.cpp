@@ -15,6 +15,7 @@
 #include "Blaster/GameState/BlasterGameState.h"
 #include "Blaster/PlayerState/BlasterPlayerState.h"
 #include "Components/Image.h"
+#include "Blaster/HUD/ReturnToMainMenu.h"
 
 void ABlasterController::BeginPlay()
 {
@@ -37,6 +38,37 @@ void ABlasterController::Tick(float DeltaTime)
     CheckTimeSync(DeltaTime);
     PollInit();
     CheckPing(DeltaTime);
+}
+
+void ABlasterController::SetupInputComponent()
+{
+    Super::SetupInputComponent();
+
+    if(InputComponent == nullptr) return;
+
+    InputComponent->BindAction("Quit", IE_Pressed, this, &ABlasterController::ShowReturnToMainMenu);
+}
+
+void ABlasterController::ShowReturnToMainMenu()
+{
+    if(ReturnToMainMenuWidget == nullptr) return;
+
+    if(ReturnToMainMenu == nullptr)
+    {
+        ReturnToMainMenu = CreateWidget<UReturnToMainMenu>(this, ReturnToMainMenuWidget);
+    }
+    if(ReturnToMainMenu)
+    {
+        bReturnToMainMenuOpen = !bReturnToMainMenuOpen;
+        if(bReturnToMainMenuOpen)
+        {
+            ReturnToMainMenu->MenuSetup();
+        }
+        else
+        {
+            ReturnToMainMenu->MenuTearDown();
+        }
+    }
 }
 
 void ABlasterController::CheckPing(float DeltaTime)
@@ -530,6 +562,46 @@ void ABlasterController::StopHighPingWarning()
         if(BlasterHUD->CharacterOverlay->IsAnimationPlaying(BlasterHUD->CharacterOverlay->HighPingAnimation))
         {
             BlasterHUD->CharacterOverlay->StopAnimation(BlasterHUD->CharacterOverlay->HighPingAnimation);
+        }
+    }
+}
+
+void ABlasterController::BroadcastElim(APlayerState* Attacker, APlayerState* Victim)
+{
+    ClientElimAnnouncement(Attacker, Victim);
+}
+
+void ABlasterController::ClientElimAnnouncement_Implementation(APlayerState* Attacker, APlayerState* Victim)
+{
+    APlayerState* Self = GetPlayerState<APlayerState>();
+
+    if(Attacker && Victim && Self)
+    {
+        BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+
+        if(BlasterHUD)
+        {
+            if(Attacker ==  Self && Victim != Self)
+            {
+                BlasterHUD->AddElimAnnouncement("You", Victim->GetPlayerName()); 
+                return;
+            }
+            if(Victim ==  Self && Attacker != Self)
+            {
+                BlasterHUD->AddElimAnnouncement(Attacker->GetPlayerName(), "you"); 
+                return;
+            }
+            if(Attacker ==  Victim && Attacker == Self)
+            {
+                BlasterHUD->AddElimAnnouncement("You", "yourself"); 
+                return;
+            }
+            if(Attacker ==  Victim && Attacker != Self)
+            {
+                BlasterHUD->AddElimAnnouncement(Attacker->GetPlayerName(), "themselves"); 
+                return;
+            }
+            BlasterHUD->AddElimAnnouncement(Attacker->GetPlayerName(), Victim->GetPlayerName());
         }
     }
 }

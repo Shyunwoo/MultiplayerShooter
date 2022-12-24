@@ -45,10 +45,15 @@ public:
 
 	FHighPingDelegate HighPingDelegate;
 
+	void BroadcastElim(class APlayerState* Attacker, APlayerState* Victim);
+
 protected:
 	virtual void BeginPlay() override;
 	void SetHUDTime();
 	void PollInit();
+	virtual void SetupInputComponent() override;
+
+	void ShowReturnToMainMenu();
 
 	//Sync time between client and server
 
@@ -78,6 +83,9 @@ protected:
 	void HighPingWarning();
 	void StopHighPingWarning();
 	void CheckPing(float DeltaTime);
+
+	UFUNCTION(Client, Reliable)
+	void ClientElimAnnouncement( APlayerState* Attacker, APlayerState* Victim);
 
 private:
 	UPROPERTY()
@@ -133,4 +141,13 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float HighPingThreshold = 100.f;
+
+	//Return to main menu
+	UPROPERTY(EditAnywhere, Category = HUD)
+	TSubclassOf<class UUserWidget> ReturnToMainMenuWidget;
+
+	UPROPERTY()
+	class UReturnToMainMenu* ReturnToMainMenu;
+
+	bool bReturnToMainMenuOpen = false;
 };

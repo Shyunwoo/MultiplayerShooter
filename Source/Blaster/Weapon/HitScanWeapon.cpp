@@ -32,11 +32,14 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
         ABlasterChar* BlasterCharacter = Cast<ABlasterChar>(FireHit.GetActor());
         if(BlasterCharacter && InstigatorController&& OwnerPawn->IsLocallyControlled())
         {
+            
             if(HasAuthority())
             {
+                const float DamageToCause = FireHit.BoneName.ToString() == FString("head") ? HeadShotDamage : Damage;
+                
                 UGameplayStatics::ApplyDamage(
                     BlasterCharacter,
-                    Damage,
+                    DamageToCause,
                     InstigatorController,
                     this,
                     UDamageType::StaticClass()
@@ -100,6 +103,11 @@ void AHitScanWeapon::WeaponTraceHit(const FVector& TraceStart, const FVector& Hi
         {
             BeamEnd=OutHit.ImpactPoint;
         }
+        else
+        {
+            OutHit.ImpactPoint = End;
+        }
+
         if(BeamParticles)
         {
             UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(

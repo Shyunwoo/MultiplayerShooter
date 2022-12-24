@@ -10,6 +10,8 @@
 #include "Blaster/BlasterTypes/CombatState.h"
 #include "BlasterChar.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftGame);
+
 UCLASS()
 class BLASTER_API ABlasterChar : public ACharacter, public IInteractCrosshairsInterface
 {
@@ -32,10 +34,15 @@ public:
 
 	virtual void OnRep_ReplicatedMovement() override;
 
-	void Elim();
+	void Elim(bool bPlayerLeftGame);
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastElim();
+	void MulticastElim(bool bPlayerLeftGame);
 	virtual void Destroyed() override;
+
+	UFUNCTION(Server, Reliable)
+	void ServerLeaveGame(); 
+
+	FOnLeftGame OnLeftGame;
 
 	UPROPERTY(Replicated)
 	bool bDisableGameplay = false;
@@ -48,6 +55,12 @@ public:
 	void UpdateHUDAmmo();
 
 	void SpawnDefaultWeapon();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastGainedTheLead();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastLostTheLead();
 
 	UPROPERTY()
 	TMap<FName, class UBoxComponent*> HitCollisionBoxes;
@@ -243,6 +256,8 @@ private:
 
 	void ElimTimerFinished();
 
+	bool bLeftGame = false;
+
 	//Dissolve effect
 	UPROPERTY(VisibleAnywhere)
 	UTimelineComponent* DissolveTimeline;
@@ -265,7 +280,7 @@ private:
 	UPROPERTY(EditAnywhere, Category=Elim)
 	UMaterialInstance* DissolveMaterialInstance;
 
-	//Elim Bot
+	//Elim effects
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* ElimBotEffect;
 
@@ -277,6 +292,12 @@ private:
 
 	UPROPERTY()
 	class ABlasterPlayerState* BlasterPlayerState;
+
+	UPROPERTY(EditAnywhere)
+	class UNiagaraSystem* CrownSystem;
+
+	UPROPERTY()
+	class UNiagaraComponent* CrownComponent;
 
 	//Grenade
 	UPROPERTY(VisibleAnywhere)
