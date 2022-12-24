@@ -30,10 +30,11 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
         WeaponTraceHit(Start, HitTarget, FireHit);
 
         ABlasterChar* BlasterCharacter = Cast<ABlasterChar>(FireHit.GetActor());
-        if(BlasterCharacter && InstigatorController&& OwnerPawn->IsLocallyControlled())
+        if(BlasterCharacter && InstigatorController)
         {
+            bool bCauseAuthDamage = !bUseServerSideRewind || OwnerPawn->IsLocallyControlled();
             
-            if(HasAuthority())
+            if(HasAuthority() && bCauseAuthDamage)
             {
                 const float DamageToCause = FireHit.BoneName.ToString() == FString("head") ? HeadShotDamage : Damage;
                 

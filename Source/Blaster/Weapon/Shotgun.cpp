@@ -65,26 +65,56 @@ void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
                 }
             }
         }
+
         TArray<ABlasterChar*> HitCharacters;
 
+        //Maps Character hit to total damage
+        TMap<ABlasterChar*, float> DamageMap;
+
+        //Calculate body shot damage by multiplyinh times hit * Damage - store in DamageMap
         for(auto HitPair : HitMap)
         {
-            if(HitPair.Key && InstigatorController)
+            if(HitPair.Key)
             {
-                if(HasAuthority() && OwnerPawn->IsLocallyControlled())
+                DamageMap.Emplace(HitPair.Key, HitPair.Value * Damage);
+                
+                HitCharacters.AddUnique(HitPair.Key);
+            }
+        }
+
+        //Calculate Headshot damage by multiplyinh times hit * HeadshotDamage - store in DamageMap
+        for(auto HeadShotHitPair : HeadShotHitMap)
+        {
+            if(HeadShotHitPair.Key)
+            {
+                if(DamageMap.Contains(HeadShotHitPair.Key)) DamageMap[HeadShotHitPair.Key] += HeadShotHitPair.Value * HeadShotDamage;
+                else DamageMap.Emplace(HeadShotHitPair.Key, HeadShotHitPair.Value * HeadShotDamage);
+                
+                HitCharacters.AddUnique(HeadShotHitPair.Key);
+            }
+        }
+
+        //Loop Through DamageMap to get total damage for each character
+        for(auto DamagePair : DamageMap)
+        {
+            if(DamagePair.Key && InstigatorController)
+            {
+                bool bCauseAuthDamage = !bUseServerSideRewind || OwnerPawn->IsLocallyControlled();
+
+                if(HasAuthority() && bCauseAuthDamage)
                 {
                     UGameplayStatics::ApplyDamage(
-                        HitPair.Key,
-                        Damage * HitPair.Value,
+                        DamagePair.Key,
+                        DamagePair.Value,
                         InstigatorController,
                         this,
                         UDamageType::StaticClass()
-                        );
+                    );
                 }
-                HitCharacters.Add(HitPair.Key);
             }
         }
-        if(!HasAuthority() && bUseServerSideRewind && OwnerPawn->IsLocallyControlled())
+
+        if(!HasAuthority() && bUseServerSideRewind)
         {
             BlasterOwnerCharacter = BlasterOwnerCharacter == nullptr ? Cast<ABlasterChar>(OwnerPawn) : BlasterOwnerCharacter;
             BlasterOwnerController = BlasterOwnerController == nullptr ? Cast<ABlasterController>(InstigatorController) : BlasterOwnerController;
