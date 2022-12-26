@@ -6,6 +6,14 @@
 #include "Blaster/PlayerController/BlasterController.h"
 #include "Net/UnrealNetwork.h"
 
+void ABlasterPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&OutLifetimeProps) const 
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+    DOREPLIFETIME(ABlasterPlayerState, Defeats);
+    DOREPLIFETIME(ABlasterPlayerState, Team);
+}
+
 void ABlasterPlayerState::AddToScore(float ScoreAmount)
 {
     SetScore(GetScore()+ScoreAmount);
@@ -62,9 +70,22 @@ void ABlasterPlayerState::OnRep_Defeats()
     }
 }
 
-void ABlasterPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&OutLifetimeProps) const 
+void ABlasterPlayerState::SetTeam(ETeam TeamToSet)
 {
-    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+    Team = TeamToSet;
 
-    DOREPLIFETIME(ABlasterPlayerState, Defeats);
+    ABlasterChar* BCharacter = Cast<ABlasterChar>(GetPawn());
+    if(BCharacter)
+    {
+        BCharacter->SetTeamColor(Team);
+    }
+}
+
+void ABlasterPlayerState::OnRep_Team()
+{
+    ABlasterChar* BCharacter = Cast<ABlasterChar>(GetPawn());
+    if(BCharacter)
+    {
+        BCharacter->SetTeamColor(Team);
+    }
 }
