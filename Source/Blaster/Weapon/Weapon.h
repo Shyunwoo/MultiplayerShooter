@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "WeaponTypes.h"
+#include "Blaster/BlasterTypes/Team.h"
 #include "Weapon.generated.h"
 
 UENUM(BlueprintType)
@@ -42,7 +43,7 @@ public:
 	virtual void OnRep_Owner() override;
 
 	void SetHUDAmmo();
-	void Dropped();
+	virtual void Dropped();
 	void AddAmmo(int32 AmmoToAdd);
 
 	//Textures for the weapon crosshairs
@@ -184,10 +185,14 @@ private:
 	UPROPERTY(EditAnywhere)
 	EWeaponType WeaponType;
 
+	UPROPERTY(EditAnywhere)
+	ETeam Team;
+
 public:
 	void SetWeaponState(EWeaponState State);
 	FORCEINLINE USphereComponent* GetAreaSphere() const{return AreaSphere;}  
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const {return WeaponMesh;} 
+	FORCEINLINE UWidgetComponent* GetPickupWidget() const {return PickupWidget;}
 
 	FORCEINLINE float GetZoomedFOV() const{return ZoomedFOV;}
 	FORCEINLINE float GetZoomInterpSpeed() const{return ZoomInterpSpeed;}
@@ -200,4 +205,6 @@ public:
 
 	FORCEINLINE float GetDamage() const {return Damage;}
 	FORCEINLINE float GetHeadShotDamage() const {return HeadShotDamage;}
+	
+	FORCEINLINE ETeam GetTeam() const {return Team;}
 };

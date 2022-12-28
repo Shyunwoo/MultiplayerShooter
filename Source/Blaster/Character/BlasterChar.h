@@ -89,6 +89,8 @@ protected:
 	void SimProxiesTurn();
 	void DropOrDestroyWeapon(class AWeapon* Weapon);
 	void DropOrDestroyWeapons();
+	void SetSpawnPoint();
+	void OnPlayerStateInitialized();
 
 	void AimOffset(float DeltaTime);
 	void CalculateAO_Pitch();
@@ -362,4 +364,8 @@ public:
 	bool IsLocallyReloading();
 
 	FORCEINLINE ULagCompensationComponent* GetLagCompensation() const {return LagCompensation;}
+	
+	bool IsHoldingTheFlag() const;
+	ETeam GetTeam();
+	void SetHoldingTheFlag(bool bHolding);
 };

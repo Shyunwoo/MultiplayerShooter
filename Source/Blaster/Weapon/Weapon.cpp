@@ -103,7 +103,6 @@ void AWeapon::ClientUpdateAmmo_Implementation(int32 ServerAmmo)
 {
 	if(HasAuthority()) return;
 
-	UE_LOG(LogTemp, Display, TEXT("ClientUpdateAmmo"));
 	Ammo = ServerAmmo;
 	--Sequence;
 	Ammo -= Sequence;
@@ -120,8 +119,6 @@ void AWeapon::AddAmmo(int32 AmmoToAdd)
 void AWeapon::ClientAddAmmo_Implementation(int32 AmmoToAdd)
 {
 	if(HasAuthority()) return;
-
-	UE_LOG(LogTemp, Display, TEXT("ClientAddAmmo"));
 
 	Ammo=FMath::Clamp(Ammo + AmmoToAdd, 0, MagCapacity);
 	BlasterOwnerCharacter = BlasterOwnerCharacter == nullptr ? Cast<ABlasterChar>(GetOwner()) : BlasterOwnerCharacter;
@@ -242,7 +239,7 @@ void AWeapon::OnDropped()
 	{
 		AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	}
-
+	
 	WeaponMesh->SetSimulatePhysics(true);
 	WeaponMesh->SetEnableGravity(true);
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
@@ -277,6 +274,10 @@ void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
 	ABlasterChar* BlasterChar=Cast<ABlasterChar>(OtherActor);
 	if(BlasterChar)
 	{
+		if(WeaponType == EWeaponType::EWT_Flag && BlasterChar->GetTeam() == Team) return;
+
+		if(BlasterChar->IsHoldingTheFlag()) return;
+
 		BlasterChar->SetOverlappingWeapon(this);
 	}
 }
@@ -286,6 +287,10 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 	ABlasterChar* BlasterChar=Cast<ABlasterChar>(OtherActor);
 	if(BlasterChar)
 	{
+		if(WeaponType == EWeaponType::EWT_Flag && BlasterChar->GetTeam() == Team) return;
+
+		if(BlasterChar->IsHoldingTheFlag()) return;
+
 		BlasterChar->SetOverlappingWeapon(nullptr);
 	}
 }
